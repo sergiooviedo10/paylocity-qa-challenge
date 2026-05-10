@@ -1,7 +1,7 @@
 # Application allows access to previous authenticated session via browser back button after session expiration
 
 ## Severity
-High
+UI Bug High
 
 ---
 
