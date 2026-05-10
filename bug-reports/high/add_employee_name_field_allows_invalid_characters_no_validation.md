@@ -58,3 +58,13 @@ Users can enter invalid employee data, leading to poor data quality and inconsis
 
 ## Notes
 This indicates missing frontend validation and inconsistent backend error handling for invalid input data.
+
+## Additional Validation Observation (Long Input Test)
+
+When extremely long strings were entered into First Name and Last Name fields, the application behaved the same way:
+
+- No UI validation was displayed
+- The form accepted oversized input
+- API returned 401 Unauthorized
+
+This confirms lack of input validation for both invalid characters and boundary length conditions.
