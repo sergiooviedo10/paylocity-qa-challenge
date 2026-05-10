@@ -57,3 +57,26 @@ Users can attempt to submit incomplete employee data without guidance, resulting
 
 ## Notes
 This indicates missing frontend validation and improper backend error handling for invalid input payloads.
+
+## Additional Validation Coverage (Dependents Field)
+
+The following invalid inputs were tested:
+
+### Negative value
+- Input: -1
+- Result: No validation, request sent, API returned 401
+
+### Decimal value
+- Input: 2.5
+- Result: No validation, request sent, API returned 401
+
+### Large value
+- Input: 999999
+- Result: No validation, request sent, API returned 401
+
+### Empty value
+- Input: blank
+- Result: No validation, request sent, API returned 401
+
+## Conclusion
+The Dependents field does not enforce input type, range, or required field validation.
