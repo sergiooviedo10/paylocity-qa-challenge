@@ -1,6 +1,7 @@
 # Add Employee allows empty submission with no validation and returns 401 Unauthorized
 
 ## Severity
+UI bug 
 High
 
 ---
