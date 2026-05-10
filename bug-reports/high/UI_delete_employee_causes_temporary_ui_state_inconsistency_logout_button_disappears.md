@@ -1,7 +1,7 @@
 # Delete Employee action causes Logout button to disappear from UI
 
 ## Severity
-High
+UI Bug High
 
 ---
 
