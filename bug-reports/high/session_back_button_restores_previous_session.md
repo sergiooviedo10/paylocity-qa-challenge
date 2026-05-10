@@ -17,15 +17,15 @@ After a period of inactivity, the application displays an HTTP 405 error page. H
 ---
 
 ## Steps to Reproduce
-1. Log in to the application
-2. Leave session idle until it expires
-3. Return to the application and observe HTTP 405 error page
-4. Click browser Back button
+1. Log in to the application with wrong user or password
+2. check you get HTTP 405 error page
+3. Click browser Back button
+4. check you see the previous login session
 
 ---
 
 ## Expected Result
-After session expiration, the user should be fully logged out and prevented from accessing any previously authenticated pages. The system should redirect to the login page.
+After getting http 405 error, the user should be fully logged out and prevented from accessing any previously authenticated pages. The system should redirect to the login page.
 
 ---
 
@@ -45,4 +45,4 @@ Not captured due to session reset state.
 ---
 
 ## Notes
-Likely related to improper session invalidation and missing cache-control or route protection after authentication timeout.
+Likely related to improper session invalidation and missing cache-control or route protection after authentication failed.
