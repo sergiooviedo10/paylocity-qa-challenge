@@ -54,3 +54,13 @@ Users lose access to logout functionality, which is a critical authentication co
 
 ## Notes
 Likely caused by UI state re-rendering or incorrect session/auth state handling triggered by delete operation.
+
+## Additional Observation
+
+After clearing browser cache and logging out and logging back in, the system returned to a normal state:
+
+- Employee list was restored correctly
+- Logout button was visible again
+- No persistent data loss occurred
+
+This indicates the issue is likely related to temporary UI state or client-side rendering after the delete action rather than a backend or authentication failure.
