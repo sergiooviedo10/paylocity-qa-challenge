@@ -1,7 +1,7 @@
 # Add Employee allows invalid characters in name fields with no validation
 
 ## Severity
-High
+UI Bug High
 
 ---
 
