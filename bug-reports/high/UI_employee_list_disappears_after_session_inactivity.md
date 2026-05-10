@@ -1,7 +1,7 @@
 # Employee list disappears after session inactivity
 
 ## Severity
-High
+UI Bug High
 
 ---
 
