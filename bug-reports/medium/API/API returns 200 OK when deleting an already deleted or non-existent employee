@@ -1,0 +1,39 @@
+# API returns 200 OK when deleting an already deleted or non-existent employee
+
+## Severity
+Medium
+
+## Type
+API / Resource State Management
+
+## Environment
+Paylocity Benefits API
+
+## Description
+The API returns a 200 OK response when attempting to delete an employee that has already been deleted or does not exist.
+
+A DELETE operation should return an appropriate response when the target resource is not found, rather than always indicating success.
+
+## Steps to Reproduce
+
+1. Create a valid employee using POST /api/Employees.
+2. Capture the returned employee ID.
+3. Send a DELETE request to:
+
+/api/Employees/{id}
+
+4. Repeat the same DELETE request again using the same employee ID.
+
+## Expected Result
+The first DELETE request should succeed with:
+- 200 OK or 204 No Content
+
+Subsequent DELETE requests for the same ID should return:
+- 404 Not Found (or appropriate resource not found response)
+
+## Actual Result
+The API returns:
+- 200 OK for every DELETE request, even when the employee has already been deleted.
+
+## Impact
+The API does not properly reflect resource state changes. Clients cannot reliably determine whether a deletion actually occurred or if the resource still exists. This may lead to incorrect assumptions in downstream systems.
