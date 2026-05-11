@@ -1,1 +1,28 @@
 
+{
+    "id": "paylocity-env",
+    "name": "Paylocity QA Environment",
+    "values": [
+      {
+        "key": "baseUrl",
+        "value": "https://wmxrwq14uc.execute-api.us-east-1.amazonaws.com/Prod",
+        "type": "default",
+        "enabled": true
+      },
+      {
+        "key": "authToken",
+        "value": "VGVzdFVzZXI5NjI6d0xEajZtNEhtXSQh",
+        "type": "default",
+        "enabled": true
+      },
+      {
+        "key": "employeeId",
+        "value": "",
+        "type": "default",
+        "enabled": true
+      }
+    ],
+    "_postman_variable_scope": "environment",
+    "_postman_exported_at": "2026-01-01T00:00:00.000Z",
+    "_postman_exported_using": "Postman/10.x"
+  }
