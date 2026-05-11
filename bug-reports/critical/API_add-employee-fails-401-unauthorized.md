@@ -1,7 +1,7 @@
 # Add Employee fails with 401 Unauthorized due to missing Authorization header
 
 ## Severity
-Critical
+API Bug Critical
 
 ---
 
