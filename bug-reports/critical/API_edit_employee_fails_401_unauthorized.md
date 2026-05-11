@@ -1,7 +1,7 @@
 # Edit Employee fails with 401 Unauthorized error
 
 ## Severity
-Critical
+API Bug Critical
 
 ---
 
