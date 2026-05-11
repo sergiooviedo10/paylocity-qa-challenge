@@ -1,7 +1,7 @@
 # Delete Employee returns 401 Unauthorized but still deletes employee record
 
 ## Severity
-High
+API Bug High
 
 ---
 
