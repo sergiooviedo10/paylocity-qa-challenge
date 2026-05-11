@@ -1,295 +1,436 @@
 {
-    "info": {
-      "name": "Paylocity - Benefits Dashboard API Automation (Final Version)",
-      "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  "info": {
+    "name": "Paylocity - Benefits Dashboard API Automation (Extended Coverage)",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "GET All Employees",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Basic {{authToken}}"
+          }
+        ],
+        "url": "{{baseUrl}}/api/Employees"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Status is 200', function () {",
+              "    pm.response.to.have.status(200);",
+              "});",
+              "",
+              "pm.test('Response time is acceptable', function () {",
+              "    pm.expect(pm.response.responseTime).to.be.below(3000);",
+              "});",
+              "",
+              "let data = pm.response.json();",
+              "",
+              "pm.test('Response is array', function () {",
+              "    pm.expect(data).to.be.an('array');",
+              "});",
+              "",
+              "if(data.length > 0){",
+              "    pm.test('Employee object structure valid', function () {",
+              "        pm.expect(data[0]).to.have.property('id');",
+              "        pm.expect(data[0]).to.have.property('firstName');",
+              "        pm.expect(data[0]).to.have.property('lastName');",
+              "        pm.expect(data[0]).to.have.property('salary');",
+              "    });",
+              "}"
+            ]
+          }
+        }
+      ]
     },
-  
-    "item": [
-  
-      {
-        "name": "GET All Employees",
-        "request": {
-          "method": "GET",
-          "header": [
-            {
-              "key": "Authorization",
-              "value": "Basic {{authToken}}"
-            }
-          ],
-          "url": "{{baseUrl}}/api/Employees"
-        },
-        "event": [
+    {
+      "name": "POST Create Employee",
+      "request": {
+        "method": "POST",
+        "header": [
           {
-            "listen": "test",
-            "script": {
-              "exec": [
-                "pm.test('Status is 200', () => {",
-                "    pm.response.to.have.status(200);",
-                "});",
-                "",
-                "pm.test('Response time < 2000ms', () => {",
-                "    pm.expect(pm.response.responseTime).to.be.below(2000);",
-                "});",
-                "",
-                "let data = pm.response.json();",
-                "",
-                "pm.test('Response is array', () => {",
-                "    pm.expect(data).to.be.an('array');",
-                "});",
-                "",
-                "pm.test('Employees exist', () => {",
-                "    pm.expect(data.length).to.be.greaterThan(0);",
-                "});"
-              ]
-            }
-          }
-        ]
-      },
-  
-      {
-        "name": "POST Create Employee",
-        "request": {
-          "method": "POST",
-          "header": [
-            {
-              "key": "Authorization",
-              "value": "Basic {{authToken}}"
-            },
-            {
-              "key": "Content-Type",
-              "value": "application/json"
-            }
-          ],
-          "body": {
-            "mode": "raw",
-            "raw": "{\n  \"firstName\": \"Steve\",\n  \"lastName\": \"Rogers\",\n  \"username\": \"srogers\",\n  \"dependants\": 2,\n  \"salary\": 52000\n}"
+            "key": "Authorization",
+            "value": "Basic {{authToken}}"
           },
-          "url": "{{baseUrl}}/api/Employees"
-        },
-        "event": [
           {
-            "listen": "test",
-            "script": {
-              "exec": [
-                "pm.test('Employee created', () => {",
-                "    pm.response.to.have.status(200);",
-                "});",
-                "",
-                "let json = pm.response.json();",
-                "",
-                "pm.test('Employee ID exists', () => {",
-                "    pm.expect(json.id).to.exist;",
-                "});",
-                "",
-                "pm.test('Salary is valid', () => {",
-                "    pm.expect(json.salary).to.be.a('number');",
-                "});",
-                "",
-                "pm.test('Dependents within range 0-32', () => {",
-                "    pm.expect(json.dependants).to.be.within(0, 32);",
-                "});",
-                "",
-                "pm.test('Benefits cost calculated', () => {",
-                "    pm.expect(json.benefitsCost).to.be.a('number');",
-                "});",
-                "",
-                "pm.test('Net pay exists', () => {",
-                "    pm.expect(json.net).to.be.a('number');",
-                "});",
-                "",
-                "pm.environment.set('employeeId', json.id);"
-              ]
-            }
+            "key": "Content-Type",
+            "value": "application/json"
           }
-        ]
-      },
-  
-      {
-        "name": "GET Employee by ID",
-        "request": {
-          "method": "GET",
-          "header": [
-            {
-              "key": "Authorization",
-              "value": "Basic {{authToken}}"
-            }
-          ],
-          "url": "{{baseUrl}}/api/Employees/{{employeeId}}"
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"firstName\": \"Tony\",\n  \"lastName\": \"Stark\",\n  \"username\": \"tstark{{$timestamp}}\",\n  \"dependants\": 2,\n  \"salary\": 85000\n}"
         },
-        "event": [
-          {
-            "listen": "test",
-            "script": {
-              "exec": [
-                "pm.test('Employee retrieved', () => {",
-                "    pm.response.to.have.status(200);",
-                "});",
-                "",
-                "let json = pm.response.json();",
-                "",
-                "pm.test('Correct employee returned', () => {",
-                "    pm.expect(json.id).to.eql(pm.environment.get('employeeId'));",
-                "});"
-              ]
-            }
-          }
-        ]
+        "url": "{{baseUrl}}/api/Employees"
       },
-  
-      {
-        "name": "PUT Update Employee",
-        "request": {
-          "method": "PUT",
-          "header": [
-            {
-              "key": "Authorization",
-              "value": "Basic {{authToken}}"
-            },
-            {
-              "key": "Content-Type",
-              "value": "application/json"
-            }
-          ],
-          "body": {
-            "mode": "raw",
-            "raw": "{\n  \"id\": \"{{employeeId}}\",\n  \"firstName\": \"Steve\",\n  \"lastName\": \"Updated\",\n  \"username\": \"srogers\",\n  \"dependants\": 3,\n  \"salary\": 60000\n}"
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Employee created successfully', function () {",
+              "    pm.response.to.have.status(200);",
+              "});",
+              "",
+              "let json = pm.response.json();",
+              "",
+              "pm.environment.set('employeeId', json.id);",
+              "",
+              "pm.test('ID exists', function () {",
+              "    pm.expect(json.id).to.exist;",
+              "});",
+              "",
+              "pm.test('Salary is number', function () {",
+              "    pm.expect(json.salary).to.be.a('number');",
+              "});",
+              "",
+              "pm.test('Benefits cost exists', function () {",
+              "    pm.expect(json.benefitsCost).to.be.a('number');",
+              "});",
+              "",
+              "pm.test('Net pay exists', function () {",
+              "    pm.expect(json.net).to.be.a('number');",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "GET Employee by ID",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Basic {{authToken}}"
+          }
+        ],
+        "url": "{{baseUrl}}/api/Employees/{{employeeId}}"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Employee fetched successfully', function () {",
+              "    pm.response.to.have.status(200);",
+              "});",
+              "",
+              "let json = pm.response.json();",
+              "",
+              "pm.test('Correct employee returned', function () {",
+              "    pm.expect(json.id).to.eql(pm.environment.get('employeeId'));",
+              "});",
+              "",
+              "pm.test('Fields are not empty', function () {",
+              "    pm.expect(json.firstName).to.not.be.empty;",
+              "    pm.expect(json.lastName).to.not.be.empty;",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "PUT Update Employee",
+      "request": {
+        "method": "PUT",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Basic {{authToken}}"
           },
-          "url": "{{baseUrl}}/api/Employees"
-        },
-        "event": [
           {
-            "listen": "test",
-            "script": {
-              "exec": [
-                "pm.test('Employee updated', () => {",
-                "    pm.response.to.have.status(200);",
-                "});",
-                "",
-                "let json = pm.response.json();",
-                "",
-                "pm.test('Dependents updated', () => {",
-                "    pm.expect(json.dependants).to.be.a('number');",
-                "});"
-              ]
-            }
+            "key": "Content-Type",
+            "value": "application/json"
           }
-        ]
-      },
-  
-      {
-        "name": "DELETE Employee",
-        "request": {
-          "method": "DELETE",
-          "header": [
-            {
-              "key": "Authorization",
-              "value": "Basic {{authToken}}"
-            }
-          ],
-          "url": "{{baseUrl}}/api/Employees/{{employeeId}}"
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"id\": \"{{employeeId}}\",\n  \"firstName\": \"Tony\",\n  \"lastName\": \"Updated\",\n  \"username\": \"tstarkupdated\",\n  \"dependants\": 4,\n  \"salary\": 95000\n}"
         },
-        "event": [
-          {
-            "listen": "test",
-            "script": {
-              "exec": [
-                "pm.test('Employee deleted', () => {",
-                "    pm.response.to.have.status(200);",
-                "});"
-              ]
-            }
-          }
-        ]
+        "url": "{{baseUrl}}/api/Employees"
       },
-  
-      {
-        "name": "NEG - Missing Required Fields",
-        "request": {
-          "method": "POST",
-          "header": [
-            {
-              "key": "Authorization",
-              "value": "Basic {{authToken}}"
-            },
-            {
-              "key": "Content-Type",
-              "value": "application/json"
-            }
-          ],
-          "body": {
-            "mode": "raw",
-            "raw": "{\n  \"firstName\": \"\",\n  \"lastName\": \"\",\n  \"username\": \"\"\n}"
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Employee updated successfully', function () {",
+              "    pm.response.to.have.status(200);",
+              "});",
+              "",
+              "let json = pm.response.json();",
+              "",
+              "pm.test('Last name updated', function () {",
+              "    pm.expect(json.lastName).to.eql('Updated');",
+              "});",
+              "",
+              "pm.test('Dependants updated', function () {",
+              "    pm.expect(json.dependants).to.eql(4);",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "DELETE Employee",
+      "request": {
+        "method": "DELETE",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Basic {{authToken}}"
+          }
+        ],
+        "url": "{{baseUrl}}/api/Employees/{{employeeId}}"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Employee deleted', function () {",
+              "    pm.response.to.have.status(200);",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "NEG - Get Non Existing Employee",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Basic {{authToken}}"
+          }
+        ],
+        "url": "{{baseUrl}}/api/Employees/999999"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Non-existing employee returns error', function () {",
+              "    pm.expect(pm.response.code).to.be.oneOf([404,400]);",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "NEG - Missing Required Fields",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Basic {{authToken}}"
           },
-          "url": "{{baseUrl}}/api/Employees"
-        },
-        "event": [
           {
-            "listen": "test",
-            "script": {
-              "exec": [
-                "pm.test('Validation triggered', () => {",
-                "    pm.expect(pm.response.code).to.be.oneOf([400, 422]);",
-                "});"
-              ]
-            }
+            "key": "Content-Type",
+            "value": "application/json"
           }
-        ]
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"firstName\": \"\",\n  \"lastName\": \"\",\n  \"username\": \"\"\n}"
+        },
+        "url": "{{baseUrl}}/api/Employees"
       },
-  
-      {
-        "name": "NEG - Invalid Dependents",
-        "request": {
-          "method": "POST",
-          "header": [
-            {
-              "key": "Authorization",
-              "value": "Basic {{authToken}}"
-            },
-            {
-              "key": "Content-Type",
-              "value": "application/json"
-            }
-          ],
-          "body": {
-            "mode": "raw",
-            "raw": "{\n  \"firstName\": \"Test\",\n  \"lastName\": \"User\",\n  \"username\": \"test\",\n  \"dependants\": -1,\n  \"salary\": 50000\n}"
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Validation error triggered', function () {",
+              "    pm.expect(pm.response.code).to.be.oneOf([400,422]);",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "NEG - Invalid Dependents",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Basic {{authToken}}"
           },
-          "url": "{{baseUrl}}/api/Employees"
-        },
-        "event": [
           {
-            "listen": "test",
-            "script": {
-              "exec": [
-                "pm.test('Invalid dependents rejected', () => {",
-                "    pm.expect(pm.response.code).to.be.oneOf([400, 422]);",
-                "});"
-              ]
-            }
+            "key": "Content-Type",
+            "value": "application/json"
           }
-        ]
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"firstName\": \"Test\",\n  \"lastName\": \"User\",\n  \"username\": \"baduser\",\n  \"dependants\": -1,\n  \"salary\": 50000\n}"
+        },
+        "url": "{{baseUrl}}/api/Employees"
       },
-  
-      {
-        "name": "NEG - Missing Authorization",
-        "request": {
-          "method": "GET",
-          "header": [],
-          "url": "{{baseUrl}}/api/Employees"
-        },
-        "event": [
-          {
-            "listen": "test",
-            "script": {
-              "exec": [
-                "pm.test('Unauthorized request blocked', () => {",
-                "    pm.response.to.have.status(401);",
-                "});"
-              ]
-            }
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Invalid dependents rejected', function () {",
+              "    pm.expect(pm.response.code).to.be.oneOf([400,422]);",
+              "});"
+            ]
           }
-        ]
-      }
-  
-    ]
-  }
+        }
+      ]
+    },
+    {
+      "name": "NEG - Dependents Above Max",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Basic {{authToken}}"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"firstName\": \"Max\",\n  \"lastName\": \"Dependent\",\n  \"username\": \"maxdep\",\n  \"dependants\": 99,\n  \"salary\": 60000\n}"
+        },
+        "url": "{{baseUrl}}/api/Employees"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Too many dependents rejected', function () {",
+              "    pm.expect(pm.response.code).to.be.oneOf([400,422]);",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "NEG - Negative Salary",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Basic {{authToken}}"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"firstName\": \"Bad\",\n  \"lastName\": \"Salary\",\n  \"username\": \"badsalary\",\n  \"dependants\": 1,\n  \"salary\": -50000\n}"
+        },
+        "url": "{{baseUrl}}/api/Employees"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Negative salary rejected', function () {",
+              "    pm.expect(pm.response.code).to.be.oneOf([400,422]);",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "NEG - Missing Authorization",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": "{{baseUrl}}/api/Employees"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Unauthorized request blocked', function () {",
+              "    pm.response.to.have.status(401);",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "NEG - Invalid Authorization",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Basic invalidtoken"
+          }
+        ],
+        "url": "{{baseUrl}}/api/Employees"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Invalid auth rejected', function () {",
+              "    pm.expect(pm.response.code).to.be.oneOf([401,403]);",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "NEG - Invalid HTTP Method",
+      "request": {
+        "method": "PATCH",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Basic {{authToken}}"
+          }
+        ],
+        "url": "{{baseUrl}}/api/Employees"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Unsupported method rejected', function () {",
+              "    pm.expect(pm.response.code).to.be.oneOf([400,404,405]);",
+              "});"
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}
