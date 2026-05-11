@@ -1,0 +1,22 @@
+{
+  "name": "paylocity-qa-challenge",
+  "version": "1.0.0",
+  "description": "This repository contains my solution for the Paylocity QA Challenge.",
+  "main": "index.js",
+  "scripts": {},
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/sergiooviedo10/paylocity-qa-challenge.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/sergiooviedo10/paylocity-qa-challenge/issues"
+  },
+  "homepage": "https://github.com/sergiooviedo10/paylocity-qa-challenge#readme",
+  "devDependencies": {
+    "@playwright/test": "^1.48.1",
+    "@types/node": "^20.11.27"
+  }
+}
