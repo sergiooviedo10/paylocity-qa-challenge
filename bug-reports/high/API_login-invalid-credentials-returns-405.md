@@ -1,7 +1,7 @@
 # Login Failure Returns HTTP 405 Error on Invalid Credentials
 
 ## Severity
-High
+API bug High
 
 ---
 
