@@ -1,4 +1,4 @@
-# Add Employee allows invalid characters in name fields with no validation
+# Add and update Employee allows invalid characters in name fields with no validation
 
 ## Severity
 UI Bug High
@@ -18,7 +18,7 @@ The Add Employee form allows invalid input in First Name and Last Name fields, i
 ---
 
 ## Steps to Reproduce
-1. Open Add Employee form
+1. Open Add or update Employee form
 2. Enter numeric values in First Name (e.g., 12345)
 3. Enter special characters in Last Name (e.g., @@@###!!!)
 4. Click Save
