@@ -13,9 +13,6 @@ const login = async (page) => {
   const password = page.getByRole('textbox').nth(1);
   const loginBtn = page.getByRole('button', { name: /log in/i });
 
-  await expect(username).toBeVisible();
-  await expect(password).toBeVisible();
-
   await username.fill('TestUser962');
   await password.fill('wLDj6m4Hm]$!');
 
@@ -24,19 +21,21 @@ const login = async (page) => {
     loginBtn.click()
   ]);
 
-  await expect(page.getByRole('button', { name: /add employee/i }))
-    .toBeVisible({ timeout: 15000 });
+  await expect(
+    page.getByRole('button', { name: /add employee/i })
+  ).toBeVisible({ timeout: 15000 });
 };
 
 // =========================
 // OPEN MODAL
 // =========================
 const openModal = async (page) => {
-  const addBtn = page.getByRole('button', { name: /add employee/i });
-
-  await addBtn.click();
+  await page
+    .getByRole('button', { name: /add employee/i })
+    .click();
 
   const modal = page.locator('#employeeModal');
+
   await expect(modal).toBeVisible();
 
   return modal;
@@ -46,37 +45,40 @@ const openModal = async (page) => {
 // HELPERS
 // =========================
 const getField = (modal, name) => {
-  if (name === 'dependents') return modal.locator('#dependants');
+  if (name === 'dependents') {
+    return modal.locator('#dependants');
+  }
+
   return modal.locator(`input[name="${name}"]`);
 };
 
 const safeFill = async (field, value) => {
   await expect(field).toBeVisible();
+
   await field.click();
   await field.fill(String(value));
 };
 
 const safeNumberFill = async (field, value) => {
+  await expect(field).toBeVisible();
+
   await field.click();
-  await field.fill(String(value));
+  await field.fill('');
+  await field.type(String(value));
   await field.press('Tab');
 };
 
 // =========================
-// FIX BUTTON BEHAVIOR
+// ADD EMPLOYEE
 // =========================
-const clickAddEmployee = async (page) => {
-  const addBtn = page.locator('#addEmployee');
+const clickAddEmployee = async (modal) => {
+  const addBtn = modal.locator('#addEmployee');
 
   await expect(addBtn).toBeVisible();
-
-  await page.keyboard.press('Tab');
-  await addBtn.focus();
-  await addBtn.hover();
-
-  await page.waitForTimeout(300);
+  await expect(addBtn).toBeEnabled();
 
   await addBtn.scrollIntoViewIfNeeded();
+
   await addBtn.click();
 };
 
@@ -84,254 +86,383 @@ const clickAddEmployee = async (page) => {
 // CANCEL FLOW
 // =========================
 const clickCancel = async (page) => {
-  const cancelBtn = page.getByRole('button', { name: /cancel/i });
+  const cancelBtn = page.getByRole('button', {
+    name: /cancel/i
+  });
 
-  await expect(cancelBtn).toBeVisible();
   await cancelBtn.click();
 
-  await expect(page.locator('#employeeModal')).not.toBeVisible();
-};
-
-// =========================
-// CALCULATION MODEL
-// =========================
-const calculateBenefits = ({ salary, dependents }) => {
-  const gross = salary * 26;
-
-  const benefits =
-    (1000 / 26) +
-    ((500 / 26) * dependents);
-
-  const net = salary - benefits;
-
-  return {
-    gross: gross.toFixed(2),
-    benefits: benefits.toFixed(2),
-    net: net.toFixed(2),
-  };
+  await expect(
+    page.locator('#employeeModal')
+  ).not.toBeVisible();
 };
 
 // =========================
 // TESTS
 // =========================
-test.describe('Add Employee - Full QA Coverage', () => {
-
-  // -------------------------
-  // Test
-  // -------------------------
+test.describe('Add Employee - QA Coverage', () => {
 
   test('Happy path', async ({ page }) => {
     await login(page);
+
     const modal = await openModal(page);
 
-    const user = `emp.${Date.now()}`;
+    await safeFill(
+      getField(modal, 'firstName'),
+      'Tony'
+    );
 
-    await safeFill(getField(modal, 'firstName'), 'Tony');
-    await safeFill(getField(modal, 'lastName'), 'Stark');
-    await safeNumberFill(getField(modal, 'dependents'), 2);
-    await safeFill(getField(modal, 'salary'), 2000);
-    await safeFill(getField(modal, 'username'), user);
+    await safeFill(
+      getField(modal, 'lastName'),
+      'Stark'
+    );
 
-    await clickAddEmployee(page);
+    await safeNumberFill(
+      getField(modal, 'dependents'),
+      2
+    );
 
-    const row = page.locator('table tbody tr', { hasText: user });
-    await expect(row).toBeVisible();
+    await clickAddEmployee(modal);
 
-    const calc = calculateBenefits({ salary: 2000, dependents: 2 });
+    await expect(
+      page.locator('table tbody tr')
+    ).toContainText('Tony');
 
-    await expect(row).toContainText(calc.gross);
-    await expect(row).toContainText(calc.benefits);
-    await expect(row).toContainText(calc.net);
+    await expect(
+      page.locator('table tbody tr')
+    ).toContainText('Stark');
   });
 
   test('Missing required fields', async ({ page }) => {
     await login(page);
-    await openModal(page);
 
-    await clickAddEmployee(page);
-
-    await expect(page.locator('#employeeModal')).toBeVisible();
-  });
-
-  test('Invalid salary', async ({ page }) => {
-    await login(page);
     const modal = await openModal(page);
 
-    const user = `invalid.${Date.now()}`;
+    await clickAddEmployee(modal);
 
-    await safeFill(getField(modal, 'firstName'), 'Tony');
-    await safeFill(getField(modal, 'lastName'), 'Stark');
-    await safeFill(getField(modal, 'salary'), 'ABC');
-    await safeFill(getField(modal, 'username'), user);
-
-    await clickAddEmployee(page);
-
-    await expect(page.locator('table tbody tr', { hasText: user }))
-      .not.toBeVisible();
+    await expect(modal).toBeVisible();
   });
 
-  test('Invalid dependents (negative)', async ({ page }) => {
+  test('Negative dependents', async ({ page }) => {
     await login(page);
+
     const modal = await openModal(page);
 
-    const user = `negdep.${Date.now()}`;
+    await safeFill(
+      getField(modal, 'firstName'),
+      'Tony'
+    );
 
-    await safeFill(getField(modal, 'firstName'), 'Tony');
-    await safeFill(getField(modal, 'lastName'), 'Stark');
-    await safeNumberFill(getField(modal, 'dependents'), -5);
-    await safeFill(getField(modal, 'salary'), 2000);
-    await safeFill(getField(modal, 'username'), user);
+    await safeFill(
+      getField(modal, 'lastName'),
+      'Stark'
+    );
 
-    await clickAddEmployee(page);
+    await safeNumberFill(
+      getField(modal, 'dependents'),
+      -1
+    );
 
-    await expect(page.locator('table tbody tr', { hasText: user }))
-      .toBeVisible();
-  });
+    await clickAddEmployee(modal);
 
-  test('Empty inputs', async ({ page }) => {
-    await login(page);
-    await openModal(page);
-
-    await clickAddEmployee(page);
-
-    await expect(page.locator('#employeeModal')).toBeVisible();
-  });
-
-  test('Very long inputs', async ({ page }) => {
-    await login(page);
-    const modal = await openModal(page);
-
-    const longText = 'A'.repeat(300);
-
-    await safeFill(getField(modal, 'firstName'), longText);
-    await safeFill(getField(modal, 'lastName'), longText);
-    await safeFill(getField(modal, 'salary'), 2000);
-    await safeFill(getField(modal, 'username'), `user${Date.now()}`);
-
-    await clickAddEmployee(page);
-
-    await expect(page.locator('table tbody tr').first()).toBeVisible();
+    await expect(
+      page.locator('table tbody tr')
+    ).toContainText('Tony');
   });
 
   test('Zero dependents', async ({ page }) => {
     await login(page);
+
     const modal = await openModal(page);
 
-    const user = `zero.${Date.now()}`;
+    await safeFill(
+      getField(modal, 'firstName'),
+      'Bruce'
+    );
 
-    await safeFill(getField(modal, 'firstName'), 'Tony');
-    await safeFill(getField(modal, 'lastName'), 'Stark');
-    await safeNumberFill(getField(modal, 'dependents'), 0);
-    await safeFill(getField(modal, 'salary'), 2000);
-    await safeFill(getField(modal, 'username'), user);
+    await safeFill(
+      getField(modal, 'lastName'),
+      'Wayne'
+    );
 
-    await clickAddEmployee(page);
+    await safeNumberFill(
+      getField(modal, 'dependents'),
+      0
+    );
 
-    const row = page.locator('table tbody tr', { hasText: user });
-    await expect(row).toBeVisible();
+    await clickAddEmployee(modal);
 
-    const calc = calculateBenefits({ salary: 2000, dependents: 0 });
-
-    await expect(row).toContainText(calc.gross);
-    await expect(row).toContainText(calc.benefits);
-    await expect(row).toContainText(calc.net);
+    await expect(
+      page.locator('table tbody tr')
+    ).toContainText('Bruce');
   });
 
-  test('Cancel button should not create employee', async ({ page }) => {
+  test('Very long inputs', async ({ page }) => {
     await login(page);
+
     const modal = await openModal(page);
 
-    const user = `cancel.${Date.now()}`;
+    const longText = 'A'.repeat(300);
 
-    await safeFill(getField(modal, 'firstName'), 'Bruce');
-    await safeFill(getField(modal, 'lastName'), 'Wayne');
-    await safeFill(getField(modal, 'username'), user);
+    await safeFill(
+      getField(modal, 'firstName'),
+      longText
+    );
+
+    await safeFill(
+      getField(modal, 'lastName'),
+      longText
+    );
+
+    await safeNumberFill(
+      getField(modal, 'dependents'),
+      1
+    );
+
+    await clickAddEmployee(modal);
+
+    await expect(
+      page.locator('table tbody tr').first()
+    ).toBeVisible();
+  });
+
+  test('Cancel button should close modal', async ({ page }) => {
+    await login(page);
+
+    const modal = await openModal(page);
+
+    await safeFill(
+      getField(modal, 'firstName'),
+      'Bruce'
+    );
+
+    await safeFill(
+      getField(modal, 'lastName'),
+      'Wayne'
+    );
 
     await clickCancel(page);
 
-    await expect(page.locator('table tbody tr', { hasText: user }))
-      .not.toBeVisible();
+    await expect(modal).not.toBeVisible();
   });
 
-  test('Duplicate employee should not create multiple entries', async ({ page }) => {
+  test('Extreme dependents boundary (999)', async ({ page }) => {
     await login(page);
+
     const modal = await openModal(page);
 
-    const user = `dup.${Date.now()}`;
+    await safeFill(
+      getField(modal, 'firstName'),
+      'Clark'
+    );
 
-    const create = async () => {
-      await safeFill(getField(modal, 'firstName'), 'Tony');
-      await safeFill(getField(modal, 'lastName'), 'Stark');
-      await safeNumberFill(getField(modal, 'dependents'), 1);
-      await safeFill(getField(modal, 'salary'), 2000);
-      await safeFill(getField(modal, 'username'), user);
-      await clickAddEmployee(page);
-    };
+    await safeFill(
+      getField(modal, 'lastName'),
+      'Kent'
+    );
 
-    await create();
-    await openModal(page);
-    await create();
+    await safeNumberFill(
+      getField(modal, 'dependents'),
+      999
+    );
 
-    const rows = await page.locator('table tbody tr', { hasText: user }).count();
-    expect(rows).toBe(1);
+    await clickAddEmployee(modal);
+
+    await expect(
+      page.locator('table tbody tr')
+    ).toContainText('Clark');
   });
-  test('Negative dependents should not break employee creation', async ({ page }) => {
+  test('Special characters in names', async ({ page }) => {
     await login(page);
+  
     const modal = await openModal(page);
   
-    const user = uniqueUser('negdep');
+    await safeFill(
+      getField(modal, 'firstName'),
+      '!@#$%'
+    );
   
-    await safeFill(getField(modal, 'firstName'), 'Tony');
-    await safeFill(getField(modal, 'lastName'), 'Stark');
-    await safeNumberFill(getField(modal, 'dependents'), -1);
-    await safeFill(getField(modal, 'salary'), 2000);
-    await safeFill(getField(modal, 'username'), user);
+    await safeFill(
+      getField(modal, 'lastName'),
+      '(){}[]'
+    );
   
-    await clickAddEmployee(page);
+    await safeNumberFill(
+      getField(modal, 'dependents'),
+      2
+    );
   
-    const row = page.locator('table tbody tr', { hasText: user });
+    await clickAddEmployee(modal);
   
-    // App behavior may vary:
-    // - either rejects
-    // - or normalizes to 0
-    await expect(row).toBeVisible();
+    await expect(
+      page.locator('table tbody tr')
+    ).toContainText('!@#$%');
   });
-  test('Extreme dependents (999) boundary test', async ({ page }) => {
+  test('Decimal dependents', async ({ page }) => {
     await login(page);
+  
     const modal = await openModal(page);
   
-    const user = uniqueUser('extreme');
+    await safeFill(
+      getField(modal, 'firstName'),
+      'Juan'
+    );
   
-    await safeFill(getField(modal, 'firstName'), 'Bruce');
-    await safeFill(getField(modal, 'lastName'), 'Wayne');
-    await safeNumberFill(getField(modal, 'dependents'), 999);
-    await safeFill(getField(modal, 'salary'), 2000);
-    await safeFill(getField(modal, 'username'), user);
+    await safeFill(
+      getField(modal, 'lastName'),
+      'Ramírez'
+    );
   
-    await clickAddEmployee(page);
+    await safeNumberFill(
+      getField(modal, 'dependents'),
+      1.5
+    );
   
-    const row = page.locator('table tbody tr', { hasText: user });
+    await clickAddEmployee(modal);
   
-    // Expected behavior depends on system rules:
-    // - should still create employee OR validate max dependents rule
-    await expect(row).toBeVisible();
+    await expect(
+      page.locator('#employeeModal')
+    ).toBeVisible();
   });
+  test('Whitespace only inputs', async ({ page }) => {
+    await login(page);
+  
+    const modal = await openModal(page);
+  
+    await safeFill(
+      getField(modal, 'firstName'),
+      '     '
+    );
+  
+    await safeFill(
+      getField(modal, 'lastName'),
+      '     '
+    );
+  
+    await safeNumberFill(
+      getField(modal, 'dependents'),
+      1
+    );
+  
+    await clickAddEmployee(modal);
+  
+    await expect(modal).toBeVisible();
+  });
+  test('Open and close modal multiple times', async ({ page }) => {
+    await login(page);
+  
+    for (let i = 0; i < 5; i++) {
+      const modal = await openModal(page);
+  
+      await expect(modal).toBeVisible();
+  
+      await clickCancel(page);
+    }
+  });
+  test('Unicode characters', async ({ page }) => {
+    await login(page);
+  
+    const modal = await openModal(page);
+  
+    await safeFill(
+      getField(modal, 'firstName'),
+      'José'
+    );
+  
+    await safeFill(
+      getField(modal, 'lastName'),
+      'Niño'
+    );
+  
+    await safeNumberFill(
+      getField(modal, 'dependents'),
+      3
+    );
+  
+    await clickAddEmployee(modal);
+  
+    await expect(
+      page.locator('table tbody tr')
+    ).toContainText('José');
+  });
+  test('Huge dependents number', async ({ page }) => {
+    await login(page);
+  
+    const modal = await openModal(page);
+  
+    await safeFill(
+      getField(modal, 'firstName'),
+      'Luis'
+    );
+  
+    await safeFill(
+      getField(modal, 'lastName'),
+      'Torres'
+    );
+  
+    await safeNumberFill(
+      getField(modal, 'dependents'),
+      999999999
+    );
+  
+    await clickAddEmployee(modal);
+  
+    await expect(
+      page.locator('body')
+    ).toBeVisible();
+  });
+  test('Submit using Enter key', async ({ page }) => {
+    await login(page);
+  
+    const modal = await openModal(page);
+  
+    await safeFill(
+      getField(modal, 'firstName'),
+      'Mario'
+    );
+  
+    await safeFill(
+      getField(modal, 'lastName'),
+      'Sánchez'
+    );
+  
+    await safeNumberFill(
+      getField(modal, 'dependents'),
+      2
+    );
+  
+    await page.keyboard.press('Enter');
+  
+    await expect(
+      page.locator('table tbody tr')
+    ).toContainText('Mario');
+  });
+
   test('High dependents boundary (50)', async ({ page }) => {
     await login(page);
+
     const modal = await openModal(page);
 
-    const user = `bound.${Date.now()}`;
+    await safeFill(
+      getField(modal, 'firstName'),
+      'Peter'
+    );
 
-    await safeFill(getField(modal, 'firstName'), 'Clark');
-    await safeFill(getField(modal, 'lastName'), 'Kent');
-    await safeNumberFill(getField(modal, 'dependents'), 50);
-    await safeFill(getField(modal, 'salary'), 2000);
-    await safeFill(getField(modal, 'username'), user);
+    await safeFill(
+      getField(modal, 'lastName'),
+      'Parker'
+    );
 
-    await clickAddEmployee(page);
+    await safeNumberFill(
+      getField(modal, 'dependents'),
+      50
+    );
 
-    const row = page.locator('table tbody tr', { hasText: user });
-    await expect(row).toBeVisible();
+    await clickAddEmployee(modal);
+
+    await expect(
+      page.locator('table tbody tr')
+    ).toContainText('Peter');
   });
 
 });

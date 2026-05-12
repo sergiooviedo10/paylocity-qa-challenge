@@ -29,21 +29,17 @@ const getEmployeeRow = (page, index = 0) => {
 };
 
 /**
- * FIX: RELIABLE DELETE CLICK (page included correctly)
+ * FIX: RELIABLE DELETE CLICK
  */
 const clickDeleteFromRow = async (page, row) => {
   const deleteIcon = row.locator('i.fas.fa-times').first();
 
   await expect(deleteIcon).toBeVisible();
   await deleteIcon.scrollIntoViewIfNeeded();
-
-  // trigger hover state (important for UI)
   await deleteIcon.hover();
 
-  // allow UI to stabilize
   await page.waitForTimeout(300);
 
-  // real click
   await deleteIcon.click();
 };
 
@@ -58,7 +54,6 @@ const confirmDelete = async (page) => {
   });
 
   if (await confirmBtn.isVisible().catch(() => false)) {
-    await confirmBtn.waitFor({ state: 'visible', timeout: 5000 });
     await confirmBtn.click();
   }
 };
@@ -75,9 +70,6 @@ const cancelDelete = async (page) => {
     name: /cancel|close|x/i
   });
 
-  await expect(cancelBtn).toBeVisible({ timeout: 5000 });
-
-  await cancelBtn.scrollIntoViewIfNeeded();
   await cancelBtn.click();
 
   await expect(modal).toBeHidden({ timeout: 5000 });
@@ -96,7 +88,8 @@ test.describe('Delete Employee Scenarios', () => {
     await clickDeleteFromRow(page, row);
     await confirmDelete(page);
 
-    await expect(page.locator('table tbody')).not.toContainText(employeeText);
+    await expect(page.locator('table tbody'))
+      .not.toContainText(employeeText);
   });
 
   test('Delete second employee in list', async ({ page }) => {
@@ -110,7 +103,8 @@ test.describe('Delete Employee Scenarios', () => {
     await clickDeleteFromRow(page, row);
     await confirmDelete(page);
 
-    await expect(page.locator('table tbody')).not.toContainText(employeeText);
+    await expect(page.locator('table tbody'))
+      .not.toContainText(employeeText);
   });
 
   test('Cancel delete should NOT remove employee', async ({ page }) => {
@@ -122,10 +116,10 @@ test.describe('Delete Employee Scenarios', () => {
     const employeeText = await row.textContent();
 
     await clickDeleteFromRow(page, row);
-
     await cancelDelete(page);
 
-    await expect(page.locator('table tbody')).toContainText(employeeText);
+    await expect(page.locator('table tbody'))
+      .toContainText(employeeText);
   });
 
   test('Delete same employee twice (idempotency check)', async ({ page }) => {
@@ -139,27 +133,39 @@ test.describe('Delete Employee Scenarios', () => {
     await clickDeleteFromRow(page, row);
     await confirmDelete(page);
 
-    await expect(page.locator('table tbody')).not.toContainText(employeeText);
+    await expect(page.locator('table tbody'))
+      .not.toContainText(employeeText);
   });
+
 
   test('Delete all employees one by one', async ({ page }) => {
     await login(page);
 
-    let rows = page.locator('table tbody tr');
+    const rowsLocator = page.locator('table tbody tr');
 
-    while (await rows.count() > 0) {
-      const row = rows.first();
+    let count = await rowsLocator.count();
+
+    while (count > 0) {
+      const row = rowsLocator.first();
+
       await expect(row).toBeVisible();
+
+      const textSnapshot = await row.textContent();
 
       await clickDeleteFromRow(page, row);
       await confirmDelete(page);
 
+      // wait until row is actually gone
+      await expect(page.locator('table tbody'))
+        .not.toContainText(textSnapshot);
+
+      // allow UI to stabilize
       await page.waitForTimeout(300);
 
-      rows = page.locator('table tbody tr');
+      count = await rowsLocator.count();
     }
 
-    await expect(page.locator('table tbody tr')).toHaveCount(0);
+    await expect(rowsLocator).toHaveCount(0);
   });
 
 });
