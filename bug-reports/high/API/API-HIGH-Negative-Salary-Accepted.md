@@ -1,4 +1,4 @@
-# API allows creation of employee with negative salary value
+# API allows creation of employee with extra accepted negative salary value in the json
 
 ## Severity
 High
